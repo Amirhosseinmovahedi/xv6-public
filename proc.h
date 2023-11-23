@@ -205,7 +205,7 @@ void rb_delete(rbtree *t, node *z){
       rb_transplant(t, z, z->l);
     }
     else{
-      y = minimum(t, z->r)
+      y = minimum(t, z->r);
       y_main_color = y->c;
       x = y->r;
       if (y->parent == z){
