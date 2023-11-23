@@ -126,7 +126,7 @@ void rb_transplant(rbtree *t, node *u, node *v){
 void rb_delete(rbtree *t, node *z){
 
     node *y = z;
-    enum color y_original_color = y->c;
+    enum color y_main_color = y->c;
     if (z->l == t->nil){
       node *x = z->r;
       rb_transplant(t, z, z->r);
@@ -137,20 +137,20 @@ void rb_delete(rbtree *t, node *z){
     }
     else{
       y = minimum(t, z->r)
-      y_original_color = y->c;
+      y_main_color = y->c;
       x = y->r;
       if (y->parent == z){
         x->parent = y;
       } else {
         rb_transplant(t, y, y->r);
         y->r = z->r;
-        y->r->p = y;
+        y->r->parent = y;
       }
       rb_transplant(t, z, y);
       y->l = z->l;
       y->l->parent = y;
       y->c = z->c;
-    if (y_original_color == BLACK){
+    if (y_main_color == BLACK){
       rb_delete_fixup(t, x);
     }
   }
