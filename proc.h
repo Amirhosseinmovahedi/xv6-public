@@ -221,8 +221,74 @@ void rb_delete(rbtree *t, node *z){
       y->c = z->c;
     if (y_main_color == BLACK){
       rb_delete_fixup(t, x);
+      }
     }
-  }
+}
+
+void rb_delete_fixup(rbtree *t, node *x){
+    while (x != t->root && x->c == BLACK)
+    {
+      if (x == x->parent->l){
+        node *w = x->parent->r;
+        // type 1
+        if (w->c == RED){
+          w->c == BLACK;
+          x->parent->c = RED;
+          rotateleft(t, x->parent);
+          w = x->parent->r;
+        }
+        // type 2
+        if (w->l->c == BLACK && w->r->c == BLACK){
+          w->c = RED;
+          x = x->parent;
+        } 
+        else {
+          // type 3
+          if (w->r->c == BLACK){
+            w->l->c = BLACK;
+            w->c = RED;
+            rotateright(t, w);
+            w = x->parent->r;
+          }
+          // type 4
+          w->c = x->parent->c;
+          x->parent->c = BLACK;
+          w->r->c = BLACK;
+          rotateleft(t, x->p);
+          x = t->root;
+        }
+      } else {
+        node *w = x->parent->l;
+        // type 1
+        if (w->c == RED){
+          w->c = BLACK;
+          x->parent->c = RED;
+          rotateright(t, x->parent);
+          w = x->parent->l;
+        }
+        // type 2
+        if (w->r->c == BLACK && w->l->c == BLACK){
+          w->c = RED;
+          x = x->parent;
+        }
+        else {
+          // type 3
+          if (w->l->c == BLACK){
+            w->r->c = BLACK;
+            w->c = RED;
+            rotateleft(t, w);
+            w = x->parent->l;
+          }
+          // type 4
+          w->c = x->parent->c;
+          x->parent->c = BLACK;
+          w->l->c = BLACK;
+          rotateright(t, x->parent);
+          x = t->root;
+        }
+      }
+    }
+    x->c = BLACK;
 }
 
 node *minimum(rbtree *t, node *u){
