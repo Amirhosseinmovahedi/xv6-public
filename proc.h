@@ -51,21 +51,63 @@ struct proc {
   char name[16];               // Process name (debugging)
 };
 
-struct rbtree {
+typedef struct rbtree {
   struct node *root;  // Root of the tree 
-};
+  struct node *nil;
+} rbtree;
 
 // State of each node in Red Black 
 enum color { RED, BLACK};
 
-struct node {
+typedef struct node {
   struct rbtree *tree;  // Tree that the node belogns to
   struct node *parent;  // Parent node
   struct node *r;       // Right child
   struct node *l;       // Left child
-  enum color c;              // Color of the node
+  enum color c;         // Color of the node
   struct proc *p;       // Proc
-};
+} node;
+
+
+void rotateright(rbtree *t, node *x) {
+    node *y = x->l;
+    x->l = y->r;
+    if (y->r != t->nil) {
+        y->r->parent = x;
+    }
+    y->parent = x->parent;
+    if (x->parent == t->nil) {
+        t->root = y;
+    }
+    else if (x == x->parent->l) {
+        x->parent->l = y;
+    }
+    else {
+        x->parent->r = y;
+    }
+    y->r = x;
+    x->parent = y;
+}
+
+void rotateleft(rbtree *t, node *x) {
+    node *y = x->r;
+    x->r = y->l;
+    if (y->l != t->nil) {
+        y->l->parent = x;
+    }
+    y->parent = x->parent;
+    if (x->parent == t->nil) {
+        t->root = y;
+    }
+    else if (x == x->parent->l) {
+        x->parent->l = y;
+    }
+    else {
+        x->parent->r = y;
+    }
+    y->l = x;
+    x->parent = y;
+}
 
 // Process memory is laid out contiguously, low addresses first:
 //   text
