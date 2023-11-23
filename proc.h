@@ -109,6 +109,20 @@ void rotateleft(rbtree *t, node *x) {
     x->parent = y;
 }
 
+void rb_transplant(rbtree *t, node *u, node *v){
+
+  if (u->parent == t->nil){
+    t->root = v;
+  }
+  else if (u == u->parent->l){
+    u->parent->l = v;
+  } 
+  else {
+    u->parent->r = v;
+  }
+  v->parent = u->parent;
+}
+
 // Process memory is laid out contiguously, low addresses first:
 //   text
 //   original data and bss
