@@ -36,6 +36,7 @@ enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
 // Per-process state
 struct proc {
+  int vruntime;                // Virtual runtime of the process
   uint sz;                     // Size of process memory (bytes)
   pde_t* pgdir;                // Page table
   char *kstack;                // Bottom of kernel stack for this process
@@ -70,43 +71,111 @@ typedef struct node {
 
 
 void rotateright(rbtree *t, node *x) {
-    node *y = x->l;
-    x->l = y->r;
-    if (y->r != t->nil) {
-        y->r->parent = x;
-    }
-    y->parent = x->parent;
-    if (x->parent == t->nil) {
-        t->root = y;
-    }
-    else if (x == x->parent->l) {
-        x->parent->l = y;
-    }
-    else {
-        x->parent->r = y;
-    }
-    y->r = x;
-    x->parent = y;
+  node *y = x->l;
+  x->l = y->r;
+  if (y->r != t->nil) {
+      y->r->parent = x;
+  }
+  y->parent = x->parent;
+  if (x->parent == t->nil) {
+      t->root = y;
+  }
+  else if (x == x->parent->l) {
+      x->parent->l = y;
+  }
+  else {
+      x->parent->r = y;
+  }
+  y->r = x;
+  x->parent = y;
 }
 
 void rotateleft(rbtree *t, node *x) {
-    node *y = x->r;
-    x->r = y->l;
-    if (y->l != t->nil) {
-        y->l->parent = x;
-    }
-    y->parent = x->parent;
-    if (x->parent == t->nil) {
-        t->root = y;
-    }
-    else if (x == x->parent->l) {
-        x->parent->l = y;
-    }
+  node *y = x->r;
+  x->r = y->l;
+  if (y->l != t->nil) {
+      y->l->parent = x;
+  }
+  y->parent = x->parent;
+  if (x->parent == t->nil) {
+      t->root = y;
+  }
+  else if (x == x->parent->l) {
+      x->parent->l = y;
+  }
+  else {
+      x->parent->r = y;
+  }
+  y->l = x;
+  x->parent = y;
+}
+
+
+void rbinsertfixup(rbtree *t, node *n) {
+
+  while (n->parent->c == RED) {
+    if (n->parent == n->parent->parent->l) {
+      node *y = n->parent->parent->r;
+      if (y->c == RED) {
+        n->parent->c = BLACK;
+        y->c = BLACK;
+        n->parent->parent->c = RED;
+        n = n->parent->parent;
+      } 
+      else {
+        if (n == n->parent->r) {
+          n = n->parent;
+          rotateleft(t, n);
+        }
+        n->parent->c = BLACK;
+        n->parent->parent->c = RED;
+        rotateright(t, n->parent->parent);
+      }
+    } 
     else {
-        x->parent->r = y;
+      node *y = n->parent->parent->l;
+      if (y->c == RED) {
+        n->parent->c = BLACK;
+        y->c = BLACK;
+        n->parent->parent->c = RED;
+        n = n->parent->parent;
+      } 
+      else {
+        if (n == n->parent->l) {
+          n = n->parent;
+          rotateright(t, n);
+        }
+        n->parent->c = BLACK;
+        n->parent->parent->c = RED;
+        rotateleft(t, n->parent->parent);
+      }
     }
-    y->l = x;
-    x->parent = y;
+  }
+  t->root->c = BLACK;
+}
+
+void rbinsert(rbtree *t, node *n) {
+  
+  node *x = t->root;
+  node *y = t->nil;
+  while (x != t->nil) {
+    y = x;
+    if (n->p->vruntime < x->p->vruntime)
+      x = x->l;
+    else
+      x = x->r;
+  }
+  n->parent = y;
+  if (y == t->nil)
+    t->root = n;
+  else if (n->p->vruntime < y->p->vruntime)
+    y->l = n;
+  else
+    y->r = n;
+  n->r = t->nil;
+  n->l = t->nil;
+  n->c = RED;
+  rbinsertfixup(t, n);
 }
 
 void rb_transplant(rbtree *t, node *u, node *v){
