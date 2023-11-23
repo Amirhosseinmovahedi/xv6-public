@@ -51,6 +51,22 @@ struct proc {
   char name[16];               // Process name (debugging)
 };
 
+struct rbtree {
+  struct node *root;  // Root of the tree 
+};
+
+// State of each node in Red Black 
+enum color { RED, BLACK};
+
+struct node {
+  struct rbtree *tree;  // Tree that the node belogns to
+  struct node *parent;  // Parent node
+  struct node *r;       // Right child
+  struct node *l;       // Left child
+  enum color c;              // Color of the node
+  struct proc *p;       // Proc
+};
+
 // Process memory is laid out contiguously, low addresses first:
 //   text
 //   original data and bss
