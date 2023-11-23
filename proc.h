@@ -111,16 +111,57 @@ void rotateleft(rbtree *t, node *x) {
 
 void rb_transplant(rbtree *t, node *u, node *v){
 
-  if (u->parent == t->nil){
-    t->root = v;
+    if (u->parent == t->nil){
+      t->root = v;
+    }
+    else if (u == u->parent->l){
+      u->parent->l = v;
+    } 
+    else {
+      u->parent->r = v;
+    }
+    v->parent = u->parent;
+}
+
+void rb_delete(rbtree *t, node *z){
+
+    node *y = z;
+    enum color y_original_color = y->c;
+    if (z->l == t->nil){
+      node *x = z->r;
+      rb_transplant(t, z, z->r);
+    }
+    else if (z->r == t->nil){
+      node *x = z->l;
+      rb_transplant(t, z, z->l);
+    }
+    else{
+      y = minimum(t, z->r)
+      y_original_color = y->c;
+      x = y->r;
+      if (y->parent == z){
+        x->parent = y;
+      } else {
+        rb_transplant(t, y, y->r);
+        y->r = z->r;
+        y->r->p = y;
+      }
+      rb_transplant(t, z, y);
+      y->l = z->l;
+      y->l->parent = y;
+      y->c = z->c;
+    if (y_original_color == BLACK){
+      rb_delete_fixup(t, x);
+    }
   }
-  else if (u == u->parent->l){
-    u->parent->l = v;
-  } 
-  else {
-    u->parent->r = v;
-  }
-  v->parent = u->parent;
+}
+
+node *minimum(rbtree *t, node *u){
+    while (u->l != t->nil)
+    {
+      u = u->l;
+    }
+    return u;
 }
 
 // Process memory is laid out contiguously, low addresses first:
