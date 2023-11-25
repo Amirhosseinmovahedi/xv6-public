@@ -299,6 +299,18 @@ node *minimum(rbtree *t, node *u){
     return u;
 }
 
+node *minimum_runnable(rbtree *tree, node *n) {
+
+    node *t;
+    if (n == tree->nil) return tree->nil;
+    t = minimumrunnable(tree, n->l);
+    if (t != tree->nil) return t;
+    else if (n->p->state == RUNNABLE) return n;
+    else
+      t = minimum_runnable(tree, n->r);
+    return t;
+}
+
 // Process memory is laid out contiguously, low addresses first:
 //   text
 //   original data and bss
