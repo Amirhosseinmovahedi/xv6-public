@@ -61,7 +61,6 @@ typedef struct rbtree {
 enum color { RED, BLACK};
 
 typedef struct node {
-  struct rbtree *tree;  // Tree that the node belogns to
   struct node *parent;  // Parent node
   struct node *r;       // Right child
   struct node *l;       // Left child
@@ -192,37 +191,12 @@ void rb_transplant(rbtree *t, node *u, node *v){
     v->parent = u->parent;
 }
 
-void rb_delete(rbtree *t, node *z){
-
-    node *y = z;
-    enum color y_main_color = y->c;
-    if (z->l == t->nil){
-      node *x = z->r;
-      rb_transplant(t, z, z->r);
+node *minimum(rbtree *t, node *u){
+    while (u->l != t->nil)
+    {
+      u = u->l;
     }
-    else if (z->r == t->nil){
-      node *x = z->l;
-      rb_transplant(t, z, z->l);
-    }
-    else{
-      y = minimum(t, z->r);
-      y_main_color = y->c;
-      node *x = y->r;
-      if (y->parent == z){
-        x->parent = y;
-      } else {
-        rb_transplant(t, y, y->r);
-        y->r = z->r;
-        y->r->parent = y;
-      }
-      rb_transplant(t, z, y);
-      y->l = z->l;
-      y->l->parent = y;
-      y->c = z->c;
-    if (y_main_color == BLACK){
-      rb_delete_fixup(t, x);
-      }
-    }
+    return u;
 }
 
 void rb_delete_fixup(rbtree *t, node *x){
@@ -254,7 +228,7 @@ void rb_delete_fixup(rbtree *t, node *x){
           w->c = x->parent->c;
           x->parent->c = BLACK;
           w->r->c = BLACK;
-          rotateleft(t, x->p);
+          rotateleft(t, x->parent);
           x = t->root;
         }
       } else {
@@ -291,12 +265,39 @@ void rb_delete_fixup(rbtree *t, node *x){
     x->c = BLACK;
 }
 
-node *minimum(rbtree *t, node *u){
-    while (u->l != t->nil)
-    {
-      u = u->l;
+
+
+void rb_delete(rbtree *t, node *z){
+
+    node *y = z;
+    enum color y_main_color = y->c;
+    if (z->l == t->nil){
+      node *x = z->r;
+      rb_transplant(t, z, z->r);
     }
-    return u;
+    else if (z->r == t->nil){
+      node *x = z->l;
+      rb_transplant(t, z, z->l);
+    }
+    else{
+      y = minimum(t, z->r);
+      y_main_color = y->c;
+      node *x = y->r;
+      if (y->parent == z){
+        x->parent = y;
+      } else {
+        rb_transplant(t, y, y->r);
+        y->r = z->r;
+        y->r->parent = y;
+      }
+      rb_transplant(t, z, y);
+      y->l = z->l;
+      y->l->parent = y;
+      y->c = z->c;
+    if (y_main_color == BLACK){
+      rb_delete_fixup(t, x);
+      }
+    }
 }
 
 node *minimum_runnable(rbtree *tree, node *n) {
