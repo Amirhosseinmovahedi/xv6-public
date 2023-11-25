@@ -66,8 +66,8 @@ typedef struct rbtree {
 
 
 
-void rotateright(rbtree *t, proc *p) {
-  proc *y = p->l;
+void rotateright(rbtree *t, struct proc *p) {
+  struct proc *y = p->l;
   p->l = y->r;
   if (y->r != t->nil) {
       y->r->rbparent = p;
@@ -86,8 +86,8 @@ void rotateright(rbtree *t, proc *p) {
   p->rbparent = y;
 }
 
-void rotateleft(rbtree *t, proc *p) {
-  proc *y = p->r;
+void rotateleft(rbtree *t, struct proc *p) {
+  struct proc *y = p->r;
   p->r = y->l;
   if (y->l != t->nil) {
       y->l->rbparent = p;
@@ -107,11 +107,11 @@ void rotateleft(rbtree *t, proc *p) {
 }
 
 
-void rbinsertfixup(rbtree *t, proc *p) {
+void rbinsertfixup(rbtree *t, struct proc *p) {
 
   while (p->rbparent->c == RED) {
     if (p->rbparent == p->rbparent->rbparent->l) {
-      proc *y = p->rbparent->rbparent->r;
+      struct proc *y = p->rbparent->rbparent->r;
       if (y->c == RED) {
         p->rbparent->c = BLACK;
         y->c = BLACK;
@@ -129,7 +129,7 @@ void rbinsertfixup(rbtree *t, proc *p) {
       }
     } 
     else {
-      proc *y = p->rbparent->rbparent->l;
+      struct proc *y = p->rbparent->rbparent->l;
       if (y->c == RED) {
         p->rbparent->c = BLACK;
         y->c = BLACK;
@@ -150,10 +150,10 @@ void rbinsertfixup(rbtree *t, proc *p) {
   t->root->c = BLACK;
 }
 
-void rbinsert(rbtree *t, proc *p) {
+void rbinsert(rbtree *t, struct proc *p) {
   
-  proc *x = t->root;
-  proc *y = t->nil;
+  struct proc *x = t->root;
+  struct proc *y = t->nil;
   while (x != t->nil) {
     y = x;
     if (p->vruntime < x->vruntime)
@@ -174,7 +174,7 @@ void rbinsert(rbtree *t, proc *p) {
   rbinsertfixup(t, p);
 }
 
-void rb_transplant(rbtree *t, proc *u, proc *v){
+void rb_transplant(rbtree *t, struct proc *u, struct proc *v){
 
     if (u->rbparent == t->nil){
       t->root = v;
@@ -188,7 +188,7 @@ void rb_transplant(rbtree *t, proc *u, proc *v){
     v->rbparent = u->rbparent;
 }
 
-proc *minimum(rbtree *t, proc *u){
+struct proc *minimum(rbtree *t, struct proc *u){
     while (u->l != t->nil)
     {
       u = u->l;
@@ -196,14 +196,14 @@ proc *minimum(rbtree *t, proc *u){
     return u;
 }
 
-void rb_delete_fixup(rbtree *t, proc *x){
+void rb_delete_fixup(rbtree *t, struct proc *x){
     while (x != t->root && x->c == BLACK)
     {
       if (x == x->rbparent->l){
-        proc *w = x->rbparent->r;
+        struct proc *w = x->rbparent->r;
         // type 1
         if (w->c == RED){
-          w->c == BLACK;
+          w->c = BLACK;
           x->rbparent->c = RED;
           rotateleft(t, x->rbparent);
           w = x->rbparent->r;
@@ -229,7 +229,7 @@ void rb_delete_fixup(rbtree *t, proc *x){
           x = t->root;
         }
       } else {
-        proc *w = x->rbparent->l;
+        struct proc *w = x->rbparent->l;
         // type 1
         if (w->c == RED){
           w->c = BLACK;
@@ -264,22 +264,23 @@ void rb_delete_fixup(rbtree *t, proc *x){
 
 
 
-void rb_delete(rbtree *t, proc *z){
+void rb_delete(rbtree *t, struct proc *z){
 
-    proc *y = z;
+    struct proc *y = z;
     enum color y_main_color = y->c;
+    struct proc *x;
     if (z->l == t->nil){
-      proc *x = z->r;
+      x = z->r;
       rb_transplant(t, z, z->r);
     }
     else if (z->r == t->nil){
-      proc *x = z->l;
+      x = z->l;
       rb_transplant(t, z, z->l);
     }
     else{
       y = minimum(t, z->r);
       y_main_color = y->c;
-      proc *x = y->r;
+      x = y->r;
       if (y->rbparent == z){
         x->rbparent = y;
       } else {
@@ -297,9 +298,9 @@ void rb_delete(rbtree *t, proc *z){
     }
 }
 
-node *minimum_runnable(rbtree *tree, proc *p) {
+struct proc *minimum_runnable(rbtree *tree, struct proc *p) {
 
-    proc *t;
+    struct proc *t;
     if (p == tree->nil) return tree->nil;
     t = minimum_runnable(tree, p->l);
     if (t != tree->nil) return t;
