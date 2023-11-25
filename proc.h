@@ -34,9 +34,16 @@ struct context {
 
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
+// State of each process in red black tree
+enum color { RED, BLACK};
+
 // Per-process state
 struct proc {
   int vruntime;                // Virtual runtime of the process
+  struct proc *rbparent;       // Parent node in red black tree
+  struct proc *r;              // Right child
+  struct proc *l;              // Left child
+  enum color c;                // Color of the node
   uint sz;                     // Size of process memory (bytes)
   pde_t* pgdir;                // Page table
   char *kstack;                // Bottom of kernel stack for this process
@@ -53,20 +60,10 @@ struct proc {
 };
 
 typedef struct rbtree {
-  struct node *root;  // Root of the tree 
-  struct node *nil;
+  struct proc *root;  // Root of the tree
+  struct proc *nil;
 } rbtree;
 
-// State of each node in Red Black 
-enum color { RED, BLACK};
-
-typedef struct node {
-  struct node *parent;  // Parent node
-  struct node *r;       // Right child
-  struct node *l;       // Left child
-  enum color c;         // Color of the node
-  struct proc *p;       // Proc
-} node;
 
 
 void rotateright(rbtree *t, node *x) {
