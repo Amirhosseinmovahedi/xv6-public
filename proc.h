@@ -174,21 +174,21 @@ void rbinsert(rbtree *t, node *n) {
   rbinsertfixup(t, n);
 }
 
-void rb_transplant(rbtree *t, node *u, node *v){
+void rb_transplant(rbtree *t, proc *u, proc *v){
 
-    if (u->parent == t->nil){
+    if (u->rbparent == t->nil){
       t->root = v;
     }
-    else if (u == u->parent->l){
-      u->parent->l = v;
+    else if (u == u->rbparent->l){
+      u->rbparent->l = v;
     } 
     else {
-      u->parent->r = v;
+      u->rbparent->r = v;
     }
-    v->parent = u->parent;
+    v->rbparent = u->rbparent;
 }
 
-node *minimum(rbtree *t, node *u){
+proc *minimum(rbtree *t, proc *u){
     while (u->l != t->nil)
     {
       u = u->l;
@@ -196,22 +196,22 @@ node *minimum(rbtree *t, node *u){
     return u;
 }
 
-void rb_delete_fixup(rbtree *t, node *x){
+void rb_delete_fixup(rbtree *t, proc *x){
     while (x != t->root && x->c == BLACK)
     {
-      if (x == x->parent->l){
-        node *w = x->parent->r;
+      if (x == x->rbparent->l){
+        proc *w = x->rbparent->r;
         // type 1
         if (w->c == RED){
           w->c == BLACK;
-          x->parent->c = RED;
-          rotateleft(t, x->parent);
-          w = x->parent->r;
+          x->rbparent->c = RED;
+          rotateleft(t, x->rbparent);
+          w = x->rbparent->r;
         }
         // type 2
         if (w->l->c == BLACK && w->r->c == BLACK){
           w->c = RED;
-          x = x->parent;
+          x = x->rbparent;
         } 
         else {
           // type 3
@@ -219,28 +219,28 @@ void rb_delete_fixup(rbtree *t, node *x){
             w->l->c = BLACK;
             w->c = RED;
             rotateright(t, w);
-            w = x->parent->r;
+            w = x->rbparent->r;
           }
           // type 4
-          w->c = x->parent->c;
-          x->parent->c = BLACK;
+          w->c = x->rbparent->c;
+          x->rbparent->c = BLACK;
           w->r->c = BLACK;
-          rotateleft(t, x->parent);
+          rotateleft(t, x->rbparent);
           x = t->root;
         }
       } else {
-        node *w = x->parent->l;
+        proc *w = x->rbparent->l;
         // type 1
         if (w->c == RED){
           w->c = BLACK;
-          x->parent->c = RED;
-          rotateright(t, x->parent);
-          w = x->parent->l;
+          x->rbparent->c = RED;
+          rotateright(t, x->rbparent);
+          w = x->rbparent->l;
         }
         // type 2
         if (w->r->c == BLACK && w->l->c == BLACK){
           w->c = RED;
-          x = x->parent;
+          x = x->rbparent;
         }
         else {
           // type 3
@@ -248,13 +248,13 @@ void rb_delete_fixup(rbtree *t, node *x){
             w->r->c = BLACK;
             w->c = RED;
             rotateleft(t, w);
-            w = x->parent->l;
+            w = x->rbparent->l;
           }
           // type 4
-          w->c = x->parent->c;
-          x->parent->c = BLACK;
+          w->c = x->rbparent->c;
+          x->rbparent->c = BLACK;
           w->l->c = BLACK;
-          rotateright(t, x->parent);
+          rotateright(t, x->rbparent);
           x = t->root;
         }
       }
@@ -264,32 +264,32 @@ void rb_delete_fixup(rbtree *t, node *x){
 
 
 
-void rb_delete(rbtree *t, node *z){
+void rb_delete(rbtree *t, proc *z){
 
-    node *y = z;
+    proc *y = z;
     enum color y_main_color = y->c;
     if (z->l == t->nil){
-      node *x = z->r;
+      proc *x = z->r;
       rb_transplant(t, z, z->r);
     }
     else if (z->r == t->nil){
-      node *x = z->l;
+      proc *x = z->l;
       rb_transplant(t, z, z->l);
     }
     else{
       y = minimum(t, z->r);
       y_main_color = y->c;
-      node *x = y->r;
-      if (y->parent == z){
-        x->parent = y;
+      proc *x = y->r;
+      if (y->rbparent == z){
+        x->rbparent = y;
       } else {
         rb_transplant(t, y, y->r);
         y->r = z->r;
-        y->r->parent = y;
+        y->r->rbparent = y;
       }
       rb_transplant(t, z, y);
       y->l = z->l;
-      y->l->parent = y;
+      y->l->rbparent = y;
       y->c = z->c;
     if (y_main_color == BLACK){
       rb_delete_fixup(t, x);
