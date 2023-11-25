@@ -66,112 +66,112 @@ typedef struct rbtree {
 
 
 
-void rotateright(rbtree *t, node *x) {
-  node *y = x->l;
-  x->l = y->r;
+void rotateright(rbtree *t, proc *p) {
+  proc *y = p->l;
+  p->l = y->r;
   if (y->r != t->nil) {
-      y->r->parent = x;
+      y->r->rbparent = p;
   }
-  y->parent = x->parent;
-  if (x->parent == t->nil) {
+  y->rbparent = p->rbparent;
+  if (p->rbparent == t->nil) {
       t->root = y;
   }
-  else if (x == x->parent->l) {
-      x->parent->l = y;
+  else if (p == p->rbparent->l) {
+      p->rbparent->l = y;
   }
   else {
-      x->parent->r = y;
+      p->rbparent->r = y;
   }
-  y->r = x;
-  x->parent = y;
+  y->r = p;
+  p->rbparent = y;
 }
 
-void rotateleft(rbtree *t, node *x) {
-  node *y = x->r;
-  x->r = y->l;
+void rotateleft(rbtree *t, proc *p) {
+  proc *y = p->r;
+  p->r = y->l;
   if (y->l != t->nil) {
-      y->l->parent = x;
+      y->l->rbparent = p;
   }
-  y->parent = x->parent;
-  if (x->parent == t->nil) {
+  y->rbparent = p->rbparent;
+  if (p->rbparent == t->nil) {
       t->root = y;
   }
-  else if (x == x->parent->l) {
-      x->parent->l = y;
+  else if (p == p->rbparent->l) {
+      p->rbparent->l = y;
   }
   else {
-      x->parent->r = y;
+      p->rbparent->r = y;
   }
-  y->l = x;
-  x->parent = y;
+  y->l = p;
+  p->rbparent = y;
 }
 
 
-void rbinsertfixup(rbtree *t, node *n) {
+void rbinsertfixup(rbtree *t, proc *p) {
 
-  while (n->parent->c == RED) {
-    if (n->parent == n->parent->parent->l) {
-      node *y = n->parent->parent->r;
+  while (p->rbparent->c == RED) {
+    if (p->rbparent == p->rbparent->rbparent->l) {
+      proc *y = p->rbparent->rbparent->r;
       if (y->c == RED) {
-        n->parent->c = BLACK;
+        p->rbparent->c = BLACK;
         y->c = BLACK;
-        n->parent->parent->c = RED;
-        n = n->parent->parent;
+        p->rbparent->rbparent->c = RED;
+        p = p->rbparent->rbparent;
       } 
       else {
-        if (n == n->parent->r) {
-          n = n->parent;
-          rotateleft(t, n);
+        if (p == p->rbparent->r) {
+          p = p->rbparent;
+          rotateleft(t, p);
         }
-        n->parent->c = BLACK;
-        n->parent->parent->c = RED;
-        rotateright(t, n->parent->parent);
+        p->rbparent->c = BLACK;
+        p->rbparent->rbparent->c = RED;
+        rotateright(t, p->rbparent->rbparent);
       }
     } 
     else {
-      node *y = n->parent->parent->l;
+      proc *y = p->rbparent->rbparent->l;
       if (y->c == RED) {
-        n->parent->c = BLACK;
+        p->rbparent->c = BLACK;
         y->c = BLACK;
-        n->parent->parent->c = RED;
-        n = n->parent->parent;
+        p->rbparent->rbparent->c = RED;
+        p = p->rbparent->rbparent;
       } 
       else {
-        if (n == n->parent->l) {
-          n = n->parent;
-          rotateright(t, n);
+        if (p == p->rbparent->l) {
+          p = p->rbparent;
+          rotateright(t, p);
         }
-        n->parent->c = BLACK;
-        n->parent->parent->c = RED;
-        rotateleft(t, n->parent->parent);
+        p->rbparent->c = BLACK;
+        p->rbparent->rbparent->c = RED;
+        rotateleft(t, p->rbparent->rbparent);
       }
     }
   }
   t->root->c = BLACK;
 }
 
-void rbinsert(rbtree *t, node *n) {
+void rbinsert(rbtree *t, proc *p) {
   
-  node *x = t->root;
-  node *y = t->nil;
+  proc *x = t->root;
+  proc *y = t->nil;
   while (x != t->nil) {
     y = x;
-    if (n->p->vruntime < x->p->vruntime)
+    if (p->vruntime < x->vruntime)
       x = x->l;
     else
       x = x->r;
   }
-  n->parent = y;
+  p->rbparent = y;
   if (y == t->nil)
-    t->root = n;
-  else if (n->p->vruntime < y->p->vruntime)
-    y->l = n;
+    t->root = p;
+  else if (p->vruntime < y->vruntime)
+    y->l = p;
   else
-    y->r = n;
-  n->r = t->nil;
-  n->l = t->nil;
-  n->c = RED;
-  rbinsertfixup(t, n);
+    y->r = p;
+  p->r = t->nil;
+  p->l = t->nil;
+  p->c = RED;
+  rbinsertfixup(t, p);
 }
 
 void rb_transplant(rbtree *t, node *u, node *v){
@@ -297,15 +297,15 @@ void rb_delete(rbtree *t, node *z){
     }
 }
 
-node *minimum_runnable(rbtree *tree, node *n) {
+node *minimum_runnable(rbtree *tree, proc *p) {
 
-    node *t;
-    if (n == tree->nil) return tree->nil;
-    t = minimumrunnable(tree, n->l);
+    proc *t;
+    if (p == tree->nil) return tree->nil;
+    t = minimum_runnable(tree, p->l);
     if (t != tree->nil) return t;
-    else if (n->p->state == RUNNABLE) return n;
+    else if (p->state == RUNNABLE) return p;
     else
-      t = minimum_runnable(tree, n->r);
+      t = minimum_runnable(tree, p->r);
     return t;
 }
 
